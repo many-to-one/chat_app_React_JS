@@ -33,7 +33,7 @@ const Login = () => {
       console.log('Login loading ---', loading);
       console.log('Login error ---', error);
       setData(response.data)
-      Cookies.set('access_token', response.data.access_token, { expires: 1 }); // Expires in 1 day
+      Cookies.set('access_token', response.data.access_token); // { expires: 1 } Expires in 1 day
       Cookies.set('refresh_token', response.data.refresh_token, { expires: 7 }); // Expires in 7 day
       setLoading(false);
       navigate('/')

@@ -8,6 +8,7 @@ import {AuthContext} from '../context/AuthContext';
 import {WebsocketContext} from '../context/WebsocketContext';
 import Cookies from 'js-cookie';
 import Users from "../components/Users";
+import MaterialIcon from "@material/react-material-icon";
 
 // const WS_URL = "ws://localhost:8080"; // Replace with your WebSocket server URL
 const WS_URL = appConfig.WS_URL
@@ -16,12 +17,13 @@ const BASE_URL = appConfig.BASE_URL
 const Chat = () => {
   const [messageHistory, setMessageHistory] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  // const [userId, seUserId] = useState(null);
+  const [firstActive, setFirstActive] = useState(null);
+  const [secondActive, setSecondActive] = useState(null);
   const [accessToken, setAccessToken] = useState(Cookies.get('access_token'))
 
   const axios = useApi();
   const {getRefreshToken} = useContext(AuthContext);
-  const {Sock, error} = useContext(WebsocketContext);
+  const {Sock, error, userStatus} = useContext(WebsocketContext);
 
   const location = useLocation();
   const chatUserId = location.state.userId;
@@ -31,23 +33,27 @@ const Chat = () => {
   const decodedToken = jwtDecode(accessToken);
   const userId = decodedToken.id
 
-  // useEffect(() => {
-  //   console.log('appConfig.accessToken ---------', Cookies.get('access_token'))
-  //   const decodedToken = jwtDecode(accessToken);
-  //   seUserId(decodedToken.id)
-  //   // const userId = decodedToken.id
-  // }, [accessToken])
-
-  // console.log('Chat--userId', userId, chatUserId)
-  // console.log('Chat--users', users)
 
   const chatHistory = async () => {
     setMessageHistory([])
     const response = await axios.get(`${BASE_URL}/chat/get_chat?sender_id=${Number(userId)}&receiver_id=${Number(chatUserId)}&count=${100}`)
-    console.log('Chat--response', response)
+    // console.log('Chat--response', response.data[0].messages)
+
     if (response.data.length !== 0) {
+
+      response.data[0].messages?.forEach(message => {
+        if (message.user_id === chatUserId && message.read === false) {
+          message.read = true; // Mark the message as read
+        }
+        // console.log('message', message);
+      });
+
+      // console.log('userStatus', userStatus)
+
         setMessageHistory(response.data[0].messages.reverse())
+        // setMessageHistory(filteredMessages)
     }
+
   }
 
   useEffect(() => {
@@ -57,10 +63,6 @@ const Chat = () => {
 
 //   ###################### WEBSOCKET THIS CHAT LOGIC ######################
 
-  // const { sendMessage, lastMessage, lastJsonMessage, readyState } = useWebSocket(`${WS_URL}${chatUserId}/${userId}?token=${accessToken}`, {
-  //   shouldReconnect: () => true, // Auto-reconnect on disconnection
-  //   onError: (event) => handleWebSocketError(event),
-  // });
 
   const { sendMessage, lastMessage, lastJsonMessage, readyState } = Sock({
     chatUserId,
@@ -74,8 +76,27 @@ const Chat = () => {
 
   const handleWebSocketError = (event) => {
     console.error("WebSocket Error:", event);
-    getRefreshToken()
+    // getRefreshToken()
+    // window.location.reload();
   };
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Connected",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Disconnected",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+
+  useEffect(() => {
+    console.log('connectionStatus', connectionStatus)
+  }, [readyState])
+
+  // useEffect(() => {
+  //   console.log('userStatus', userStatus)
+  //   sendMessage(JSON.stringify(userStatus));
+  // }, [userStatus])
+
 
   //   ###################### END OF WEBSOCKET THIS CHAT LOGIC ######################
 
@@ -98,6 +119,14 @@ const Chat = () => {
         setMessageHistory((prev) => [...prev, lastJsonMessage]);
       } else if ( lastJsonMessage["user_id"] === userId && lastJsonMessage["receiver_id"] === chatUserId ) {
         setMessageHistory((prev) => [...prev, lastJsonMessage]);
+      } else if ( lastJsonMessage["is active"] === chatUserId ) {
+        console.log('is active', lastJsonMessage["is active"])
+        messageHistory.forEach(message => {
+          if (message.user_id === chatUserId && message.read === false) {
+            message.read = true; // Mark the message as read
+          }
+          // console.log('message', message);
+        });
       }
     }
   }, [lastJsonMessage]);
@@ -112,13 +141,6 @@ const Chat = () => {
     setNewMessage(""); // Clear input field after sending
   };
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Connected",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Disconnected",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  }[readyState];
 
   const messageEndRef = useRef(null);
 
@@ -145,6 +167,16 @@ const Chat = () => {
                       key={index}
                   >
                       {message.message}
+                      <div className="message-time-read">
+                        {message.created_at.slice(11, 16)}
+                        <MaterialIcon
+                          icon="done_all"
+                          style={{
+                            color: message.read ? "blue" : "gray",
+                            fontSize: "15px",
+                          }}
+                        />
+                      </div>
                   </div>
               ))}
               <div ref={messageEndRef}></div>

@@ -80,3 +80,12 @@
   .all-users {
     width: 20vw;
   }
+
+  .message-time-read {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 8px;
+    gap: 10px;
+  }

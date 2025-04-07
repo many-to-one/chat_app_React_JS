@@ -48,17 +48,17 @@ const AuthProvider = ({ children }) => {
   const getRefreshToken = async () => {
 
     const response = await axios.post(`${appConfig.BASE_URL}/auth/refresh_token?refresh_token=${appConfig.refreshToken}`);
-    // console.log('getRefreshToken', response)
+    console.log('getRefreshToken', response)
     // return response.data;
     Cookies.set('access_token', response.data.access_token, {
           // expires: 1,  // Access token expires in 1 day
           secure: true,
       });
     
-      Cookies.set('refresh_token', response.data.refresh_token, {
-          // expires: 7,  // Refresh token expires in 7 days
-          secure: true,
-      });
+      // Cookies.set('refresh_token', response.data.refresh_token, {
+      //     // expires: 7,  // Refresh token expires in 7 days
+      //     secure: true,
+      // });
   
   };
 
