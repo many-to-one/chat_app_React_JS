@@ -9,6 +9,7 @@ import {WebsocketContext} from '../context/WebsocketContext';
 import Cookies from 'js-cookie';
 import Users from "../components/Users";
 import MaterialIcon from "@material/react-material-icon";
+import axios from "axios";
 
 // const WS_URL = "ws://localhost:8080"; // Replace with your WebSocket server URL
 const WS_URL = appConfig.WS_URL
@@ -21,7 +22,7 @@ const Chat = () => {
   const [secondActive, setSecondActive] = useState(null);
   const [accessToken, setAccessToken] = useState(Cookies.get('access_token'))
 
-  const axios = useApi();
+  const axios_ = useApi();
   const {getRefreshToken} = useContext(AuthContext);
   const {Sock, error, userStatus} = useContext(WebsocketContext);
 
@@ -36,7 +37,7 @@ const Chat = () => {
 
   const chatHistory = async () => {
     setMessageHistory([])
-    const response = await axios.get(`${BASE_URL}/chat/get_chat?sender_id=${Number(userId)}&receiver_id=${Number(chatUserId)}&count=${100}`)
+    const response = await axios_.get(`${BASE_URL}/chat/get_chat?sender_id=${Number(userId)}&receiver_id=${Number(chatUserId)}&count=${100}`)
     // console.log('Chat--response', response.data[0].messages)
 
     if (response.data.length !== 0) {
@@ -76,7 +77,7 @@ const Chat = () => {
 
   const handleWebSocketError = (event) => {
     console.error("WebSocket Error:", event);
-    // getRefreshToken()
+    getRefreshToken()
     // window.location.reload();
   };
 
