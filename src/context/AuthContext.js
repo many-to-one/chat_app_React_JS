@@ -48,6 +48,7 @@ const AuthProvider = ({ children }) => {
   const getRefreshToken = async () => {
 
     const response = await axios.post(`${appConfig.BASE_URL}/auth/refresh_token?refresh_token=${appConfig.refreshToken}`);
+    // response['online'] = true;
     console.log('getRefreshToken', response)
     
     Cookies.set('access_token', response.data.access_token, {

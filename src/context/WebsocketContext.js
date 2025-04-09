@@ -13,8 +13,7 @@ const WebsocketProvider = ({ children }) => {
   const [userStatus, setUserStatus] = useState({});
 
   const Sock = ({ chatUserId, userId, accessToken }) => {
-    // const websocket = useWebSocket(`${WS_URL}${chatUserId}/${userId}/new`, {
-    const websocket = useWebSocket(`${WS_URL}${chatUserId}/${userId}/?token=${encodeURIComponent(Cookies.get('access_token'))}`, {
+    const websocket = useWebSocket(`${WS_URL}/${userId}/${chatUserId}/${encodeURIComponent(Cookies.get('access_token'))}`, {
       shouldReconnect: () => true, // Auto-reconnect on disconnection
       onError: (event) => setError(event),
       onMessage: (event) => {
