@@ -11,6 +11,8 @@ const WebsocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [error, setError] = useState(null);
   const [userStatus, setUserStatus] = useState({});
+  const [userStatusAll, setUserStatusAll] = useState({});
+  const [errorAll, setErrorAll] = useState(null);
 
   const Sock = ({ chatUserId, userId, accessToken }) => {
     const websocket = useWebSocket(`${WS_URL}/${userId}/${chatUserId}/${encodeURIComponent(Cookies.get('access_token'))}`, {
@@ -36,6 +38,31 @@ const WebsocketProvider = ({ children }) => {
     return websocket; 
   };
 
+
+  const SockAll = ({ chatUserId, userId, accessToken }) => {
+    const websocket = useWebSocket(`${WS_URL}/${userId}/${encodeURIComponent(Cookies.get('access_token'))}`, {
+      shouldReconnect: () => true, // Auto-reconnect on disconnection
+      onError: (event) => setErrorAll(event),
+      onMessage: (event) => {
+        const data = JSON.parse(event.data);
+        // console.log(`Sock onMessage data`, data);
+        // setUserStatus(data)
+      },
+      onClose: () => {
+        console.log("WebSocket disconnected", userId);
+        // You can send a message to the server or handle it locally
+        const data = {
+          "message": "disconnected",
+          "disconnected": userId,
+          "from": chatUserId,
+        }
+        setUserStatusAll(data)
+      },
+  
+    });
+    return websocket; 
+  };
+
   
 
   return (
@@ -44,6 +71,10 @@ const WebsocketProvider = ({ children }) => {
         socket,
         error,
         userStatus,
+        SockAll,
+        userStatusAll,
+        errorAll
+
       }}>
       {children}
     </WebsocketContext.Provider>
