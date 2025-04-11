@@ -24,7 +24,7 @@ const Chat = () => {
 
   const axios_ = useApi();
   const {getRefreshToken} = useContext(AuthContext);
-  const {Sock, error, userStatus} = useContext(WebsocketContext);
+  const {Sock, SockAll, error, userStatus} = useContext(WebsocketContext);
 
   const location = useLocation();
   const chatUserId = location.state.userId;
@@ -65,10 +65,10 @@ const Chat = () => {
 //   ###################### WEBSOCKET THIS CHAT LOGIC ######################
 
 
-  const { sendMessage, lastMessage, lastJsonMessage, readyState } = Sock({
-    chatUserId,
+  const { sendMessage, lastMessage, lastJsonMessage, readyState } = SockAll({
+    // chatUserId,
     userId,
-    accessToken,
+    // accessToken,
   });
 
   useEffect(() => {

@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Users = ({ users }) => {
+const Users = ({ users, lastMess }) => {
   const navigate = useNavigate();
+  console.log('lastMess', lastMess);
 
   return (
     <div className='all-users'>
@@ -17,7 +18,11 @@ const Users = ({ users }) => {
               })
             }
           >
-            {user.username}
+           {lastMess && lastMess["receiver_id"] === user.id ? (
+                <p>{user.username} - {lastMess["message"]}</p>
+            ) : (
+                <p>{user.username}</p>
+            )}
           </li>
         ))}
       </ul>

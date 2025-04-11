@@ -17,6 +17,8 @@ const BASE_URL = appConfig.BASE_URL
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
+  const [lastMess, setLastMess] = useState({});
+  const [chatUserId, setChatUserId] = useState('');
   const accessToken = Cookies.get('access_token');
   const axios_ = useApi();
   const navigate = useNavigate();
@@ -47,7 +49,7 @@ const AllUsers = () => {
 
 
   //   ###################### WEBSOCKET THIS CHAT LOGIC ######################
-    const { sendMessage, lastMessage, lastJsonMessage, readyState } = SockAll({userId,});
+    const { sendMessage, lastMessage, lastJsonMessage, readyState } = SockAll({userId});
   
     useEffect(() => {
       handleWebSocketError(errorAll);
@@ -70,11 +72,46 @@ const AllUsers = () => {
     useEffect(() => {
       console.log('connectionStatus', connectionStatus)
     }, [readyState])
+
+
+    // useEffect(() => {
+    //     if (lastMessage !== null) {
+    //         const parsedData = JSON.parse(lastMessage.data);
+    //         // console.log(`Got a new message: ${parsedData.sender_id}`)
+    //         console.log(`Got a new message: ${parsedData.message}`)
+    //     //   setMessageHistory((prev) => [...prev, parsedData]);
+    //     }
+    //   }, [lastMessage]);
+
+    useEffect(() => {
+        if (lastJsonMessage !== null) {
+          console.log("Parsed JSON message received:", lastJsonMessage);
+          if ( lastJsonMessage["info"] === "new_message" ) {
+            console.log('new message', lastJsonMessage["message"])
+            setLastMess({'message': lastJsonMessage["message"], receiver_id: lastJsonMessage["user_id"]})
+            // setChatUserId(lastJsonMessage["receiver_id"])
+            // setMessageHistory((prev) => [...prev, lastJsonMessage]);
+          }
+          //   setMessageHistory((prev) => [...prev, lastJsonMessage]);
+          // } else if ( lastJsonMessage["user_id"] === userId && lastJsonMessage["receiver_id"] === chatUserId ) {
+          //   setMessageHistory((prev) => [...prev, lastJsonMessage]);
+          // } else if ( lastJsonMessage["is active"] === chatUserId ) {
+          //   console.log('is active', lastJsonMessage["is active"])
+          //   messageHistory.forEach(message => {
+          //     if (message.user_id === chatUserId && message.read === false) {
+          //       message.read = true; // Mark the message as read
+          //     }
+          //     // console.log('message', message);
+          //   });
+          // }
+        }
+      }, [lastJsonMessage]);
+
      //   ###################### END OF WEBSOCKET THIS CHAT LOGIC ######################
 
 
   return (
-    <Users users={users} />
+    <Users users={users} lastMess={lastMess} />
   );
 };
 

@@ -39,7 +39,7 @@ const WebsocketProvider = ({ children }) => {
   };
 
 
-  const SockAll = ({ chatUserId, userId, accessToken }) => {
+  const SockAll = ({ userId }) => {
     const websocket = useWebSocket(`${WS_URL}/${userId}/${encodeURIComponent(Cookies.get('access_token'))}`, {
       shouldReconnect: () => true, // Auto-reconnect on disconnection
       onError: (event) => setErrorAll(event),
@@ -54,7 +54,7 @@ const WebsocketProvider = ({ children }) => {
         const data = {
           "message": "disconnected",
           "disconnected": userId,
-          "from": chatUserId,
+          // "from": chatUserId,
         }
         setUserStatusAll(data)
       },
